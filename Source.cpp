@@ -18,19 +18,19 @@ struct InstrumentationSession
 	const char* name;
 };
 
+//Singleton class
 class Instrumentor
 {
 private:
 	InstrumentationSession* session;
 	bool Profile_start;
 	std::ofstream m_OutputStream;
-public:
 	Instrumentor()
-		:session(nullptr), Profile_start(false)
 	{
-
+		session = nullptr;
+		Profile_start = false;
 	}
-	
+public:
 	void BeginSession(const char* name, const std::string& filepath = "benchmark.json")
 	{
 		m_OutputStream.open(filepath);
@@ -46,7 +46,7 @@ public:
 		m_OutputStream.close();
 		delete session;
 		session = nullptr;
-		
+
 	}
 
 	void WriteHeader()
@@ -67,9 +67,9 @@ public:
 		return instance;
 	}
 
-	void WriteProfile(const ProfileResult & result)
+	void WriteProfile(const ProfileResult& result)
 	{
-		if (Profile_start ==true)
+		if (Profile_start == true)
 		{
 			m_OutputStream << ',';
 		}
@@ -81,11 +81,11 @@ public:
 		std::replace(name.begin(), name.end(), '"', '\'');
 		m_OutputStream << "{";
 		m_OutputStream << "\"cat\":\"function\",";
-		m_OutputStream << "\"dur\":" << ((long long)result.end -(long long) result.start) << ',';
+		m_OutputStream << "\"dur\":" << ((long long)result.end - (long long)result.start) << ',';
 		m_OutputStream << "\"name\":\"" << name << "\",";
 		m_OutputStream << "\"ph\":\"X\",";
 		m_OutputStream << "\"pid\":0,";
-		m_OutputStream << "\"ts\":" << result.start<< ',';
+		m_OutputStream << "\"ts\":" << result.start << ',';
 		m_OutputStream << "\"es\":" << result.end;
 		m_OutputStream << "}";
 
@@ -116,7 +116,9 @@ public:
 		end = std::chrono::high_resolution_clock::now();
 		long long st = std::chrono::time_point_cast<std::chrono::microseconds>(start).time_since_epoch().count();
 		long long  en = std::chrono::time_point_cast<std::chrono::microseconds>(end).time_since_epoch().count();
-		Instrumentor::Get().WriteProfile({ m_Name, st, en});
+		Instrumentor::Get().WriteProfile({ m_Name, st, en });
+
+
 		m_Stopped = true;
 
 
@@ -127,7 +129,7 @@ private:
 	const char* m_Name;
 	std::chrono::time_point<std::chrono::high_resolution_clock> start;
 	std::chrono::time_point<std::chrono::high_resolution_clock> end;
-	
+
 };
 
 #define PROFILING 1
@@ -144,10 +146,10 @@ private:
 void func1()
 {
 	SCOPE();
-	long long  p=0;
+	long long  p = 0;
 	for (int i = 0; i < 1000; i++)
 	{
-		std::cout << "Hello Worls" <<std:: endl;
+		std::cout << "Hello Worls" << std::endl;
 	}
 }
 void func2()
@@ -156,7 +158,7 @@ void func2()
 	long long p = 2;
 	for (int i = 0; i < 1003; i++)
 	{
-		std::cout << "Hello Dear" << std:: endl;
+		std::cout << "Hello Dear" << std::endl;
 		p++; p++;
 	}
 
@@ -164,7 +166,7 @@ void func2()
 
 int main()
 {
-	Instrumentor::Get().BeginSession("Profiling","Hello_9.json");
+	Instrumentor::Get().BeginSession("Profiling", "Hello_9.json");
 	func1();
 	func2();
 	Instrumentor::Get().EndSession();
